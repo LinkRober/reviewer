@@ -1,0 +1,1 @@
+"""Bundled review prompt resources."""

@@ -1,0 +1,3 @@
+openai<3,>=2.53
+pydantic<3,>=2.13
+python-dotenv<2,>=1.2

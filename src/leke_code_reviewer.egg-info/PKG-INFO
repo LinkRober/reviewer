@@ -1,3 +1,13 @@
+Metadata-Version: 2.4
+Name: leke-code-reviewer
+Version: 0.1.0
+Summary: Leke iOS code review CLI
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: openai<3,>=2.53
+Requires-Dist: pydantic<3,>=2.13
+Requires-Dist: python-dotenv<2,>=1.2
+
 # Leke Code Reviewer
 
 `lcr` 是用于审核 iOS 组件分支差异的命令行工具。
@@ -14,9 +24,7 @@ pipx ensurepath
 以 editable 模式安装当前源码：
 
 ```bash
-pipx install \
-  --python /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 \
-  --editable /Users/xiamin/Desktop/reviewer
+pipx install --editable /Users/xiamin/Desktop/reviewer
 ```
 
 依赖或打包配置变化后重新安装：
