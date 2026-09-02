@@ -42,7 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def run_review(args: argparse.Namespace) -> int:
-    repo_path = (args.path.expanduser() / args.name).resolve()
+    repo_path = (args.path.expanduser()).resolve()
     print(f"path:{repo_path}")
     review_repository(
         repo_path=repo_path,

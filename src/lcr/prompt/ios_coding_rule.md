@@ -1,32 +1,12 @@
-# iOS编码规范
+# iOS编码规范—Agent
 
 # 前言
 
-车同轨，书同文。编码规范既是高效合作的基础，也是深度创新的开始。编写此编码规范的目的如下：
-
-1. **统一开发风格，提升协作效率，让项目看起来是同一个人写的，方便快速修改别人的代码**
-
-2. **作为代码 review 依据，不断打磨代码，使代码更健壮**
-
-3. **为新人熟悉项目提供快速上手的抓手，迅速了解项目结构，熟悉一个模块则可以类推所有模块**
-
 本规范参考了业界一些比较知名公司的 iOS 开发规范做了适当的修改，以更适应本公司的业务开发需求。关于开发规范部分根据约束力强弱，依次分为以下 2 类：
 
-- 【强制】 必须遵守，违反本约定或将会引起严重的后果
+- 【强制】 必须遵守，违反本约定或将会引起严重的后果，属于P1问题
 
 - 【推荐】尽量遵守，长期遵守有助于系统稳定性和合作效率的提升
-
-虽说一千个人眼中就有一千个哈姆雷特，但此规范更推荐全部使用【推荐】以上级别来严格要求自己，让自己的代码就像艺术品一样。
-
-为使读者更容易理解此规范，响应规范下都对条目进行了举例说明。
-
-1. “正例”里面举例说明了什么样的编码格式是友好的、被人喜爱的
-
-2. “反例”里面举例说明的是什么样的编码格式是不够优雅的、让人迷惑的
-
-> 典型的“正例”和“反例”欢迎补充👏
-> 
-> 
 
 # 一、美式英语规范
 
@@ -187,7 +167,7 @@ destSel
 ```Plaintext
 /// 反例:
 
--(void)setT:(NSString *)text i:(UIImage *)image;
+- (void)setT:(NSString *)text i:(UIImage *)image;
 - (void)sendAction:(SEL)aSelector :(id)anObject :(BOOL)flag;
 - (id)taggedView:(NSInteger)tag;
 - (instancetype)initWithWidth:(CGFloat)width andHeight:(CGFloat)height;
@@ -219,7 +199,7 @@ NSString* text;
 NSString * text;
 ```
 
-## 5\. 业务模块文件夹名
+### 3\. 业务模块文件夹名
 
 - Model 模型
 
@@ -235,14 +215,44 @@ NSString * text;
 
 - Proxy 暴露给其他模块的接口
 
-
-
-## 网络请求命名
+### 4\. 网络请求命名
 
 命名方式以`API`结尾
 
 ```JSON
 @interface LKCheckVerificationAPI : LKBusinessAPI2Manager
+@end
+```
+
+### 5\. 模型命名
+
+命名方式以`Model`结尾
+
+```Plain Text
+@interface LKUserModel : NSObject
+@end
+```
+
+### 6\. 控制器命名
+
+命名方式以`VC`结尾
+
+```Plain Text
+@interface LKUserCenterVC : NSObject
+@end
+```
+
+### 7\. ViewModel命名
+
+命名方式以`ViewModel`结尾
+
+```Plain Text
+#import <LKLeMobile/LMBBaseViewModel.h>
+#import <LKLeMobile/LMBModel.h>
+#import <LKLeMobile/LMBViewModelSet.h>
+
+@interface LKHomeViewModel<__covariant ObjectType> : LMBBaseViewModel
+
 @end
 ```
 
@@ -567,7 +577,7 @@ CGRect frame = (CGRect){ .origin = CGPointZero, .size = frame.size };
 
 ## 4\. 黄金路径
 
-【强制】 当使用条件语句时，尽量不要嵌套 if 语句，多个返回也是 ok 的减少层级，代码更简洁
+【强制】 当使用条件语句时，尽量不要嵌套 if 语句，多个返回也是可以的，减少层级，代码更简洁
 
 ```Plaintext
 /// 正例:
@@ -758,16 +768,3 @@ NSString *a = b ? "a" : @"";
 //打电话
 - (void)bridgeGotoMakePhoneCall:(NSDictionary *)params;
 ```
-
-# 七、参考链接
-
-1. [https://github\.com/google/styleguide/blob/gh\-pages/objcguide\.md](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fgoogle%2Fstyleguide%2Fblob%2Fgh-pages%2Fobjcguide.md)
-
-2. [https://github\.com/raywenderlich/objective\-c\-style\-guide/blob/master/README\.md\#dot\-notation\-syntax](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fraywenderlich%2Fobjective-c-style-guide%2Fblob%2Fmaster%2FREADME.md%23dot-notation-syntax)
-
-3. [https://github\.com/NYTimes/objective\-c\-style\-guide](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2FNYTimes%2Fobjective-c-style-guide)
-
-4. [https://github\.com/samlaudev/Objective\-C\-Coding\-Style](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fsamlaudev%2FObjective-C-Coding-Style)
-
-
-
