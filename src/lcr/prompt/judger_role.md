@@ -17,8 +17,8 @@
 # 输出格式
 举例
 {
-    "result":1,
-    "details":[
+    "pass":1,
+    "minors":[
         {
             "category": "coding_arch",
             "id": "ATCH-001",
@@ -38,12 +38,12 @@
             "suggestion": "修改为 `} else if ([fontName isEqualToString:@\"DingTalk-JinBuTi\"]) {`。"
         }
     ],
-    "reason":[]
+    "blockers":[]
 }
 说明：
-result：结果 1 通过；2 不通过
-details:编码规范审核专员和架构审核专员输出的审核结果，为整改提供线索
-reason:导致不通过的原因
+pass: 1 通过；2 不通过
+minors:编码规范审核专员和架构审核专员输出的审核结果，轻微问题，不会导致审核不通过
+blockers:编码规范审核专员和架构审核专员输出的审核结果，重大问题，会导致审核不通过
 
 注意：
 只有上述字段，不要自己新增
