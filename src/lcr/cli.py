@@ -43,7 +43,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def run_review(args: argparse.Namespace) -> int:
     repo_path = args.path.expanduser().resolve()
-    print(f"path:{repo_path}")
+    print(f"================审核清单================")
+    print(f"仓库名称：{args.name}")
+    print(f"仓库路径：{repo_path}")
+    print(f"基线分支：{args.from_branch}")
+    print(f"审核分支：{args.to_branch}")
     review_repository(
         repo_path=repo_path,
         from_branch=args.from_branch,

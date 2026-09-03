@@ -2,6 +2,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 import json
 from pathlib import Path
+import secrets
 from tempfile import TemporaryDirectory
 import subprocess
 import unittest
@@ -11,6 +12,7 @@ from lcr.workflow import (
     NoReviewableFiles,
     ReviewError,
     collect_diff,
+    generate_review_id,
     load_prompt,
     review_repository,
 )
@@ -57,13 +59,35 @@ class WorkflowTests(unittest.TestCase):
                         llm=fake_llm,
                     )
 
-        self.assertEqual(result, '{"result": 1, "details": [], "reason": []}')
+        parsed_result = json.loads(result)
+        self.assertEqual(parsed_result["result"], 1)
+        self.assertRegex(
+            parsed_result["reviewId"],
+            r"^LCR-\d{13}-[0-9A-F]{12}$",
+        )
         self.assertEqual(len(fake_llm.messages), 3)
         self.assertEqual(fake_llm.messages[0][1]["role"], "user")
         self.assertIn("diff --git", fake_llm.messages[0][1]["content"])
         judge_input = json.loads(fake_llm.messages[2][1]["content"])
         self.assertIn("STYLE-001", judge_input["rule"])
         self.assertIn("ARCH-001", judge_input["arch"])
+
+        review_id = parsed_result["reviewId"]
+        self.assertIn(review_id, fake_llm.messages[0][0]["content"])
+        self.assertIn(review_id, fake_llm.messages[1][0]["content"])
+
+    def test_generate_review_id_uses_milliseconds_and_random_suffix(self):
+        with patch("lcr.workflow.time.time", return_value=1788391234.567):
+            with patch.object(secrets, "token_hex", return_value="4f9a2c7e81d0"):
+                review_id = generate_review_id()
+
+        self.assertEqual(review_id, "LCR-1788391234567-4F9A2C7E81D0")
+        self.assertRegex(review_id, r"^LCR-\d{13}-[0-9A-F]{12}$")
+
+    def test_each_review_generates_a_new_id(self):
+        first = generate_review_id()
+        second = generate_review_id()
+        self.assertNotEqual(first, second)
 
     def test_diff_command_filters_to_ios_extensions(self):
         outputs = ["true", "base", "head", "merge", "diff --git a/file.m b/file.m"]
@@ -93,6 +117,25 @@ class WorkflowTests(unittest.TestCase):
                 )
 
         self.assertEqual(review_range["fileExtensions"], [".h", ".m", ".mm"])
+        self.assertRegex(review_range["reviewId"], r"^LCR-\d{13}-[0-9A-F]{12}$")
+
+    def test_review_range_contains_review_id_when_provided(self):
+        outputs = ["true", "base", "head", "merge", "diff --git a/file.h b/file.h"]
+        with TemporaryDirectory() as directory:
+            with patch("lcr.workflow.run_git", side_effect=outputs):
+                _, review_range = collect_diff(
+                    Path(directory),
+                    "main",
+                    "feature",
+                    "../",
+                    "LKFont",
+                    "LCR-1788391234567-4F9A2C7E81D0",
+                )
+
+        self.assertEqual(
+            review_range["reviewId"],
+            "LCR-1788391234567-4F9A2C7E81D0",
+        )
 
     def test_missing_repository_is_reported(self):
         with self.assertRaisesRegex(ReviewError, "仓库路径不存在"):

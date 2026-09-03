@@ -1,7 +1,9 @@
 from importlib import resources
 import json
 from pathlib import Path
+import secrets
 import subprocess
+import time
 
 from .llm import LLMAdaptor
 from .reviewer import Reviewer
@@ -16,6 +18,13 @@ class NoReviewableFiles(ReviewError):
 
 
 IOS_FILE_EXTENSIONS = (".h", ".m", ".mm")
+
+
+def generate_review_id() -> str:
+    """Generate a unique identifier for one review execution."""
+    timestamp_ms = int(time.time() * 1000)
+    random_suffix = secrets.token_hex(6).upper()
+    return f"LCR-{timestamp_ms}-{random_suffix}"
 
 
 def load_prompt(name: str) -> str:
@@ -59,7 +68,9 @@ def collect_diff(
     to_branch: str,
     component_path: str,
     component_name: str,
+    review_id: str | None = None,
 ) -> tuple[str, dict[str, object]]:
+    review_id = review_id or generate_review_id()
     if not repo_path.is_dir():
         raise ReviewError(f"仓库路径不存在或不是目录: {repo_path}")
     if run_git(repo_path, "rev-parse", "--is-inside-work-tree") != "true":
@@ -91,6 +102,7 @@ def collect_diff(
         )
 
     review_range = {
+        "reviewId": review_id,
         "componentPath": component_path,
         "componentName": component_name,
         "baseSha": from_commit_hash,
@@ -111,12 +123,16 @@ def review_repository(
     component_name: str,
     llm: LLMAdaptor | None = None,
 ) -> str:
+    review_id = generate_review_id()
+    print(f"审核 ID: {review_id}")
+
     code_diff, review_range = collect_diff(
         repo_path,
         from_branch,
         to_branch,
         component_path,
         component_name,
+        review_id=review_id,
     )
     range_prompt = json.dumps(review_range, ensure_ascii=False, indent=2)
 
@@ -136,7 +152,7 @@ def review_repository(
     judge_prompt = make_judge_prompt(load_prompt("judger_role.md"), common_prompt)
 
     model = llm or LLMAdaptor()
-    print("================编码规范审核================")
+    print("================编码规范审核============")
     rule_result = Reviewer(
         "rule_reviewer",
         model,
@@ -155,8 +171,19 @@ def review_repository(
         indent=2,
     )
     print("================总结================")
-    return Reviewer(
+
+    final_result = Reviewer(
         "judge_reviewer",
         model,
         system_prompt=judge_prompt,
     ).run(judge_input)
+    try:
+        parsed_result = json.loads(final_result)
+    except json.JSONDecodeError:
+        return final_result
+
+    if not isinstance(parsed_result, dict):
+        return final_result
+
+    parsed_result["reviewId"] = review_id
+    return json.dumps(parsed_result, ensure_ascii=False, indent=2)
