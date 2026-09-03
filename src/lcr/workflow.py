@@ -4,11 +4,18 @@ from pathlib import Path
 import subprocess
 
 from .llm import LLMAdaptor
-from .reviewer import RuleReviewer
+from .reviewer import Reviewer
 
 
 class ReviewError(RuntimeError):
     """Raised when a repository cannot be reviewed."""
+
+
+class NoReviewableFiles(ReviewError):
+    """Raised when a diff contains no supported Objective-C files."""
+
+
+IOS_FILE_EXTENSIONS = (".h", ".m", ".mm")
 
 
 def load_prompt(name: str) -> str:
@@ -52,7 +59,7 @@ def collect_diff(
     to_branch: str,
     component_path: str,
     component_name: str,
-) -> tuple[str, dict[str, str]]:
+) -> tuple[str, dict[str, object]]:
     if not repo_path.is_dir():
         raise ReviewError(f"仓库路径不存在或不是目录: {repo_path}")
     if run_git(repo_path, "rev-parse", "--is-inside-work-tree") != "true":
@@ -69,9 +76,19 @@ def collect_diff(
         to_commit_hash,
     )
     diff_spec = f"{merge_base_hash}..{to_commit_hash}"
-    code_diff = run_git(repo_path, "diff", diff_spec)
+    code_diff = run_git(
+        repo_path,
+        "diff",
+        diff_spec,
+        "--",
+        "*.h",
+        "*.m",
+        "*.mm",
+    )
     if not code_diff:
-        raise ReviewError(f"提交范围没有代码差异: {diff_spec}")
+        raise NoReviewableFiles(
+            "提交范围内没有可审核的 iOS 文件（仅支持 .h、.m、.mm）"
+        )
 
     review_range = {
         "componentPath": component_path,
@@ -80,6 +97,7 @@ def collect_diff(
         "headSha": to_commit_hash,
         "mergeBaseSha": merge_base_hash,
         "diffSpec": diff_spec,
+        "fileExtensions": list(IOS_FILE_EXTENSIONS),
     }
     return code_diff, review_range
 
@@ -136,8 +154,8 @@ def review_repository(
         ensure_ascii=False,
         indent=2,
     )
-    print("================开始总结================")
-    return RuleReviewer(
+    print("================总结================")
+    return Reviewer(
         "judge_reviewer",
         model,
         system_prompt=judge_prompt,

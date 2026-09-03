@@ -32,7 +32,7 @@ class LLMAdaptor:
         )
 
     def think(self, messages: Sequence[dict[str, str]]) -> str:
-        print(f"🧠 正在调用 {self.model} 模型...")
+        # print(f"🧠 正在调用 {self.model} 模型...")
         try:
             response = self.client.responses.create(
                 model=self.model,

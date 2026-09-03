@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from lcr.cli import build_parser, main
+from lcr.workflow import NoReviewableFiles
 
 
 class CliTests(unittest.TestCase):
@@ -36,9 +37,8 @@ class CliTests(unittest.TestCase):
 
     def test_path_with_or_without_trailing_slash_resolves_equally(self):
         with TemporaryDirectory() as directory:
-            parent = Path(directory) / "parent"
-            repository = parent / "LKFont"
-            repository.mkdir(parents=True)
+            repository = Path(directory) / "LKFont"
+            repository.mkdir()
             resolved_paths = []
 
             def fake_review_repository(**kwargs):
@@ -49,11 +49,11 @@ class CliTests(unittest.TestCase):
                 with redirect_stdout(StringIO()):
                     first = main([
                         "review", "--from", "main", "--to", "feature",
-                        "--path", str(parent), "--name", "LKFont",
+                        "--path", str(repository), "--name", "LKFont",
                     ])
                     second = main([
                         "review", "--from", "main", "--to", "feature",
-                        "--path", f"{parent}/", "--name", "LKFont",
+                        "--path", f"{repository}/", "--name", "LKFont",
                     ])
 
         self.assertEqual(first, 0)
@@ -71,6 +71,23 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 1)
         self.assertIn("错误: bad review", stderr.getvalue())
+
+    def test_no_reviewable_files_returns_code_zero(self):
+        with patch(
+            "lcr.cli.review_repository",
+            side_effect=NoReviewableFiles(
+                "提交范围内没有可审核的 iOS 文件（仅支持 .h、.m、.mm）"
+            ),
+        ):
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main([
+                    "review", "--from", "main", "--to", "feature",
+                    "--path", ".", "--name", "LKFont",
+                ])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("没有可审核的 iOS 文件", stdout.getvalue())
 
 
 if __name__ == "__main__":

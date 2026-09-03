@@ -7,6 +7,7 @@
 - 合并问题时保留全部 `sourceFindingIds`，使用来源中的最高等级和最低置信度。
 - 不输出风险等级、门禁状态或退出码。
 - 只输出符合指定 JSON Schema 的 JSON，不输出 Markdown 或解释文字。
+- 输出按`输出格式`中的格式字段展示，不要自己新增
 
 # 公共规则
 {common_rule}
@@ -21,7 +22,10 @@
     "minors":[
         {
             "category": "coding_arch",
-            "id": "ATCH-001",
+            "id": "FINAL-001",
+            "sourceFindingIds": [
+                "STYLE-001"
+            ]
             "file": "LKFont/LKFont/Core/UIFont+LKFont.m",
             "line": 70,
             "lv":"p3",
@@ -30,7 +34,10 @@
         },
         {
             "category": "coding_standard",
-            "id": "STYLE-001",
+            "id": "FINAL-002",
+            "sourceFindingIds": [
+                "STYLE-002"
+            ]
             "file": "LKFont/LKFont/Core/UIFont+LKFont.m",
             "line": 70,
             "lv":"p3",
@@ -44,6 +51,5 @@
 pass: 1 通过；2 不通过
 minors:编码规范审核专员和架构审核专员输出的审核结果，轻微问题，不会导致审核不通过
 blockers:编码规范审核专员和架构审核专员输出的审核结果，重大问题，会导致审核不通过
+sourceFindingIds:审核内容来源
 
-注意：
-只有上述字段，不要自己新增

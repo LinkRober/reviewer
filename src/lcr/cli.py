@@ -5,7 +5,7 @@ from typing import Sequence
 
 from .config import ConfigurationError
 from .llm import LLMError
-from .workflow import ReviewError, review_repository
+from .workflow import NoReviewableFiles, ReviewError, review_repository
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,15 +34,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--path",
         type=Path,
         required=True,
-        help="仓库父目录",
+        help="完整仓库目录",
     )
-    review_parser.add_argument("--name", required=True, help="仓库目录名")
+    review_parser.add_argument("--name", required=True, help="组件名称")
     review_parser.set_defaults(handler=run_review)
     return parser
 
 
 def run_review(args: argparse.Namespace) -> int:
-    repo_path = (args.path.expanduser()).resolve()
+    repo_path = args.path.expanduser().resolve()
     print(f"path:{repo_path}")
     review_repository(
         repo_path=repo_path,
@@ -59,6 +59,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return args.handler(args)
+    except NoReviewableFiles as error:
+        print(str(error))
+        return 0
     except (ConfigurationError, LLMError, ReviewError, ValueError) as error:
         print(f"错误: {error}", file=sys.stderr)
         return 1

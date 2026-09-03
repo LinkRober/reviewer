@@ -2,7 +2,7 @@ from .agent import Agent
 from .llm import LLMAdaptor
 
 
-class RuleReviewer(Agent):
+class Reviewer(Agent):
     def __init__(
         self,
         name: str,

@@ -44,12 +44,15 @@ Shell 中已经导出的同名环境变量优先于配置文件。
 lcr review \
   --from release/1.7.0 \
   --to feature/xm/my_7 \
-  --path ../ \
+  --path ../LKFont \
   --name LKFont
 ```
 
-`--path` 是仓库父目录，`--name` 是仓库目录名。脚本使用
+`--path` 是完整仓库目录，`--name` 是组件名称。脚本使用
 `origin/<branch>` 解析 `--from` 和 `--to`。
+
+iOS 审核只处理 `.h`、`.m`、`.mm` 文件。提交范围内没有这些文件时，
+命令会提示并正常结束，不调用模型。
 
 源码兼容入口：
 
@@ -57,6 +60,6 @@ lcr review \
 python __init__.py \
   --from release/1.7.0 \
   --to feature/xm/my_7 \
-  --path ../ \
+  --path ../LKFont \
   --name LKFont
 ```
