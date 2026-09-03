@@ -16,7 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     # 命令
     subparsers = parser.add_subparsers(dest="command", required=True)
-    review_parser = subparsers.add_parser("review", help="审核两个远程分支之间的差异")
+    review_parser = subparsers.add_parser("review", help="审核两个分支之间的差异")
     # 参数
     review_parser.add_argument(
         "--from",
