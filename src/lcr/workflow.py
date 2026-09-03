@@ -137,13 +137,13 @@ def review_repository(
 
     model = llm or LLMAdaptor()
     print("================编码规范审核================")
-    rule_result = RuleReviewer(
+    rule_result = Reviewer(
         "rule_reviewer",
         model,
         system_prompt=rule_prompt,
     ).run(code_diff)
     print("================架构审核================")
-    arch_result = RuleReviewer(
+    arch_result = Reviewer(
         "arch_reviewer",
         model,
         system_prompt=arch_prompt,
